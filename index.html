@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Forecast</title> 
+    <link rel="icon" type="image/x-icon" href="./favicon-orange_alt.ico">
+    <style>
+        *{
+            font-family:sans-serif;
+            box-sizing: border-box;
+        }
+        #form {
+            display: flex;
+            justify-content: center;
+            margin: 20px auto;
+            padding: 20px 30px;
+            box-shadow: rgb(38, 57, 77) 0px 20px 30px -10px;
+            background-color:rgb(29, 136, 223);
+            width:370px;
+            border-radius: 5px;
+        }
+
+        #form >input{
+            font-size:20px;
+            padding: 5px;
+            border: none;
+            outline: none;
+            margin-right: 5px;
+            border-radius: 5px;
+        }
+
+        #container {
+            width:1000px;
+            display: flex;
+            text-align:center;
+            box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
+            margin:20px auto;
+            border-radius: 5px;
+        }
+        #container>div{
+            margin: 10px 20px;
+        }
+
+        #container>div>img {
+            width: 100px;
+        }
+
+        #map {
+            display: flex;
+            justify-content: center;
+            margin-top:10px;
+        }
+        #map >iframe {
+            width:800px;
+            height:250px;
+            border-radius: 5px;
+            box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <form action="" id="form">
+        <input type="text" id="city" required>
+        <input type="submit" value="Submit">
+
+    </form>
+<div>
+    <div id="container"></div>
+    <div id="map"></div>
+
+</div>
+  
+
+
+    <script>
+        let mapApiKey = "AIzaSyDPpz1o15efX1-QKij3krYHkbd7AJOa-NE";
+        let apiKey = "3d4dff5515c3d3a103ef0450fb3cf1fa";
+        document.querySelector("#form").addEventListener("submit", getWeather);
+
+        async function getWeather(event) {
+            event.preventDefault();
+            try {
+                let city = document.querySelector("#city").value
+                let res = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=metric`);
+                let data = await res.json();
+                displayData(data);
+            } catch (error) {
+                console.log(error);
+            }
+        }
+
+
+        function displayData(data) {
+            document.querySelector("#city").value = null;
+            let images = ["https://www.freeiconspng.com/uploads/sunny-icon-17.png", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSBmE4Op7nZYwHw0GLd93HW8O74m2gIcTSqLsqw-VBNK0R9C33CRoU0jl1NzfZQ2ptmXB4&usqp=CAU", "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThjKLX_013XxV-PU20cDeGrQGXES2zUC8jIYA8qFcL9-5EBK0iiTcisJiNegFJBGFgAvE&usqp=CAU"]
+            let days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+            document.querySelector("#container").innerHTML = null;
+            for (let i = 0; i <= 6; i++) {
+                let div = createTag("div");
+                let name = createTag("h2");
+                name.innerText = days[i];
+                let temp = createTag("p");
+                temp.innerText = data.list[i].main.temp + "°";
+                let image = createTag("img");
+                if (+data.list[i].main.temp > 30) {
+                    image.src = images[0];
+                } else if (+data.list[i].main.temp > 20 && +data.list[i].main.temp < 25) {
+                    image.src = images[1]
+                } else {
+                    image.src = images[2];
+                }
+                let minTemp= createTag("p");
+                minTemp.innerText = data.list[i].main.temp_min + "°";
+                let wind = createTag("p");
+                wind.innerText = data.list[i].wind.speed + "Km/h";
+
+                div.append(name, temp, image, minTemp, wind);
+                document.querySelector("#container").append(div);
+            }
+            let iframe = createTag("iframe");
+            iframe.src = `https://www.google.com/maps/embed/v1/place?key=${mapApiKey}&q=${data.city.name}`
+
+            document.querySelector("#map").innerHTML = null;
+            document.querySelector("#map").append(iframe);
+        }
+
+
+        function createTag(tag) {
+            return document.createElement(tag);
+        }
+    </script>
+</body>
+
+</html>
